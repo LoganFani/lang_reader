@@ -31,7 +31,7 @@ def download_video(url: str) -> str:
         if (VIDEO_DIR / f"{video_id}.{ext}").exists():
             print("Video already cached")
             return video_id
-        
+
     ytdlp_cmd = [
         "yt-dlp",
         "-P", VIDEO_DIR,
@@ -43,7 +43,6 @@ def download_video(url: str) -> str:
         "--sleep-interval", "5",
         url,
     ]
-
 
 
     subprocess.run(ytdlp_cmd, check=True)

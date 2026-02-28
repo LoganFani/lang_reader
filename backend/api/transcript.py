@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
-from backend.services.transcript import transcript_to_srt
+from backend.services.transcript import save_transcript_as_srt
 
 router = APIRouter()
 
@@ -16,6 +16,6 @@ class TranscriptResponse(BaseModel):
 def convert_transcript(req: TranscriptRequest):
     
     try:
-        return transcript_to_srt(req.transcript)
+        return {"parsed_srt_path": save_transcript_as_srt(req.transcript, req.video_id)}
     except:
         raise Exception("Could not parse transcript to SRT.") 

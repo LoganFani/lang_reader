@@ -1,7 +1,8 @@
 import re
 from typing import List, Tuple
+from utils import paths
 
-TIME_RE = re.compile(r"^(\d+):(\d{2})$")
+TIME_RE = re.compile(r"^\[?(\d+):(\d{2})\]?(?:\s|-|$)")
 
 def parse_transcript_to_blocks(raw_text: str) -> List[Tuple[float, str]]:
     lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
@@ -18,14 +19,21 @@ def parse_transcript_to_blocks(raw_text: str) -> List[Tuple[float, str]]:
         seconds = int(m.group(2))
         start_time = minutes * 60 + seconds
 
+        # capture text on same line (e.g. "0:04 Hello world")
+        remainder = lines[i][m.end():].strip()
+
         i += 1
         text_lines = []
+        if remainder:
+            text_lines.append(remainder)
+
         while i < len(lines) and not TIME_RE.match(lines[i]):
             text_lines.append(lines[i])
             i += 1
 
-        text = " ".join(text_lines)
-        blocks.append((start_time, text))
+        text = " ".join(text_lines).strip()
+        if text:
+            blocks.append((start_time, text))
 
     return blocks
 
@@ -53,3 +61,19 @@ def transcript_to_srt(raw_text: str) -> str:
         )
 
     return "\n".join(srt_lines)
+
+
+def save_transcript_as_srt(raw_text: str, video_id: str) -> str:
+    """
+    Converts a pasted transcript to SRT and saves it.
+    Returns the full path to the saved SRT file.
+    """
+
+    srt_text = transcript_to_srt(raw_text)
+
+    srt_path = paths.SUBS_STORAGE / f"{video_id}.srt"
+
+    with open(srt_path, "w", encoding="utf-8") as f:
+        f.write(srt_text)
+
+    return str(srt_path)
