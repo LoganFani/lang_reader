@@ -4,4 +4,11 @@ env/
 
 *__pycache__/
 
-*bin/
+backend/bin/**
+
+#storage
+backend/storage/frames/**
+backend/storage/subs/**
+backend/storage/videos/**
+#db
+backend/db/**

@@ -35,6 +35,9 @@ def download_video(url: str) -> str:
     ytdlp_cmd = [
         "yt-dlp",
         "-P", VIDEO_DIR,
+        "-f", "bv*[vcodec^=avc1]+ba[acodec^=mp4a]/b",
+        "--merge-output-format", "mp4",
+        "-o", "%(id)s.%(ext)s",
         "--ignore-errors",
         "--no-abort-on-error",
         "--sleep-interval", "5",

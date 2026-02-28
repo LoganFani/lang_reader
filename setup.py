@@ -75,7 +75,7 @@ def install_model():
 
 
 def main():
-    print("\n --- Lang APP Installer ---\n")
+    print("\n --- Lang Reader Installer ---\n")
 
     install_ffmpeg()
     install_ytdlp()
