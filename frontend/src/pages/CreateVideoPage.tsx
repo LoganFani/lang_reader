@@ -26,20 +26,43 @@ export default function CreateVideoPage() {
     setError(null)
 
     try {
-      // TODO: Replace with real backend call
-      console.log({
-        url,
-        transcript,
-        fromLang: selectedPreset.fromLang,
-        toLang: selectedPreset.toLang
+      // 1️⃣ Download video
+      const videoRes = await fetch("http://127.0.0.1:8000/api/video/load", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ youtube_url: url })
       })
 
-      // Fake backend response
-      const fakeVideoId = "demo123"
-      navigate(`/video/${fakeVideoId}`)
+      if (!videoRes.ok) throw new Error("Video download failed")
 
-    } catch (err) {
-      setError("Failed to create video.")
+      const videoData = await videoRes.json()
+      const videoId = videoData.video_id
+
+      // 2️⃣ Convert transcript
+      const transcriptRes = await fetch("http://127.0.0.1:8000/api/transcript/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          video_id: videoId,
+          transcript
+        })
+      })
+
+      if (!transcriptRes.ok) throw new Error("Transcript conversion failed")
+
+      const transcriptData = await transcriptRes.json()
+      console.log("Transcript saved:", transcriptData)
+
+      // 3️⃣ Navigate to video page
+      navigate(`/video/${videoId}`, {
+        state: {
+            fromLang: selectedPreset.fromLang,
+            toLang: selectedPreset.toLang
+        }
+        })
+
+    } catch (err: any) {
+      setError(err.message || "Failed to create video")
     } finally {
       setLoading(false)
     }
@@ -80,12 +103,10 @@ export default function CreateVideoPage() {
           ))}
         </select>
 
-        {error && (
-          <div style={{ color: "red" }}>{error}</div>
-        )}
+        {error && <div style={{ color: "red" }}>{error}</div>}
 
         <button onClick={handleCreate} disabled={loading}>
-          {loading ? "Creating..." : "Create Video"}
+          {loading ? "Processing..." : "Create Video"}
         </button>
       </div>
     </div>
