@@ -36,48 +36,58 @@ def parse_fragments(raw_text: str) -> List[Dict]:
     return fragments
 
 
+MAX_WORDS   = 30
+MAX_SECONDS = 10.0
+
+
 def merge_into_sentences(fragments: List[Dict]) -> List[Dict]:
     """
     Merge short timestamped fragments into full sentences.
-    A sentence boundary is detected when a fragment ends with
-    sentence-terminating punctuation.
+    Flushes on sentence-ending punctuation, or when the buffer
+    exceeds MAX_WORDS or MAX_SECONDS — whichever comes first.
     """
     sentences = []
     buffer_text: List[str] = []
     buffer_start: float | None = None
     idx = 1
 
-    for frag in fragments:
-        if buffer_start is None:
-            buffer_start = frag["start"]
-        buffer_text.append(frag["text"])
-
-        if SENTENCE_END_RE.search(frag["text"]):
-            text = " ".join(buffer_text).strip()
-            tokens = text.split()
-            sentences.append({
-                "id": idx,
-                "start": buffer_start,
-                "end": None,
-                "text": text,
-                "tokens": tokens,
-            })
-            idx += 1
-            buffer_text = []
-            buffer_start = None
-
-    # Flush any remaining text that didn't end with punctuation
-    if buffer_text and buffer_start is not None:
+    def flush(last_frag_start: float) -> None:
+        nonlocal idx, buffer_text, buffer_start
         text = " ".join(buffer_text).strip()
+        if not text:
+            return
+        tokens = text.split()
         sentences.append({
             "id": idx,
             "start": buffer_start,
             "end": None,
             "text": text,
-            "tokens": text.split(),
+            "tokens": tokens,
         })
+        idx += 1
+        buffer_text = []
+        buffer_start = None
 
-    # Fill end times using the next sentence's start
+    for frag in fragments:
+        if buffer_start is None:
+            buffer_start = frag["start"]
+
+        buffer_text.append(frag["text"])
+        word_count    = sum(len(t.split()) for t in buffer_text)
+        elapsed       = frag["start"] - buffer_start
+
+        hit_punctuation = bool(SENTENCE_END_RE.search(frag["text"]))
+        hit_word_cap    = word_count >= MAX_WORDS
+        hit_time_cap    = elapsed >= MAX_SECONDS
+
+        if hit_punctuation or hit_word_cap or hit_time_cap:
+            flush(frag["start"])
+
+    # Flush any remaining buffer
+    if buffer_text and buffer_start is not None:
+        flush(buffer_start)
+
+    # Fill end times
     for i in range(len(sentences)):
         if i + 1 < len(sentences):
             sentences[i]["end"] = sentences[i + 1]["start"] - 0.05

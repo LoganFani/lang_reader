@@ -60,7 +60,7 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
-      <h1>Penguino</h1>
+      <h1>SMTK</h1>
 
       <div className={styles.headerActions}>
         <Link to="/new"><button>+ New Video</button></Link>
