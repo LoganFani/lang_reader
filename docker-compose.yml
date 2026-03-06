@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .              # Set context to root so it can see requirements.txt
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/db:/app/db           # Persist your DB files
+      - ./backend/storage:/app/storage # Persist your storage files
+      - ./llama/models:/app/llama/models # Share LLM models with backend
+    env_file:
+      - .env
+    restart: always
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Prevents local node_modules from overwriting container
+    depends_on:
+      - backend
