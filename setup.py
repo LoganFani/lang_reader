@@ -7,6 +7,9 @@ from pathlib import Path
 
 # -- Bootstrap: resolve project root before importing utils --------------------
 ROOT = Path(__file__).resolve().parent
+BIN_DIR = ROOT / "backend" / "bin"
+MODELS_DIR = ROOT / "llama" / "models"
+MISTRALQ4_PATH =  MODELS_DIR / "mistral-7b-instruct-v0.2.Q4_0.gguf"
 sys.path.insert(0, str(ROOT))
 
 from utils import paths
@@ -65,29 +68,29 @@ def install_ffmpeg():
         print("✓ ffmpeg already on PATH")
         return
 
-    local_ffmpeg = paths.BIN_DIR / "ffmpeg.exe"
+    local_ffmpeg = BIN_DIR / "ffmpeg.exe"
     if local_ffmpeg.exists():
         print("✓ ffmpeg already in bin dir")
         return
 
     print("⬇  Downloading ffmpeg for Windows...")
     url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-    zip_path = paths.BIN_DIR / "ffmpeg.zip"
+    zip_path = BIN_DIR / "ffmpeg.zip"
     
-    paths.BIN_DIR.mkdir(exist_ok=True)
+    BIN_DIR.mkdir(exist_ok=True)
     run(["curl", "-L", url, "-o", str(zip_path)])
     
     with zipfile.ZipFile(zip_path, "r") as z:
-        z.extractall(paths.BIN_DIR)
+        z.extractall(BIN_DIR)
     
     zip_path.unlink()
     
     # Move files out of the extracted subfolder to /bin
-    ffmpeg_bin_dir = next(paths.BIN_DIR.glob("ffmpeg-*/bin"))
+    ffmpeg_bin_dir = next(BIN_DIR.glob("ffmpeg-*/bin"))
     for f in ffmpeg_bin_dir.iterdir():
-        f.rename(paths.BIN_DIR / f.name)
+        f.rename(BIN_DIR / f.name)
     
-    print(f"✓ ffmpeg extracted to {paths.BIN_DIR}")
+    print(f"✓ ffmpeg extracted to {BIN_DIR}")
 
 # -- yt-dlp --------------------------------------------------------------------
 
@@ -96,7 +99,7 @@ def install_ytdlp():
         print("✓ yt-dlp already on PATH")
         return
 
-    local_ytdlp = paths.BIN_DIR / "yt-dlp.exe"
+    local_ytdlp = BIN_DIR / "yt-dlp.exe"
     if local_ytdlp.exists():
         print("✓ yt-dlp already in bin dir")
         return
@@ -109,14 +112,14 @@ def install_ytdlp():
 # -- LLM model -----------------------------------------------------------------
 
 def install_model():
-    if paths.MISTRALQ4_PATH.exists():
+    if MISTRALQ4_PATH.exists():
         print("✓ Model already exists")
         return
 
     print("⬇  Downloading Mistral model (~4GB)...")
     url = "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_0.gguf"
-    run(["curl", "-L", "--progress-bar", url, "-o", str(paths.MISTRALQ4_PATH)])
-    print("✓ Model downloaded to:", paths.MISTRALQ4_PATH)
+    run(["curl", "-L", "--progress-bar", url, "-o", str(MISTRALQ4_PATH)])
+    print("✓ Model downloaded to:", MISTRALQ4_PATH)
 
 # -- .env ----------------------------------------------------------------------
 
