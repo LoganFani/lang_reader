@@ -1,4 +1,4 @@
-# SMTK (Sentence Mining Tool Kit)
+# SMConstruct (Sentence Mining Construct)
 
 **Pre-Release** </br>
 A tool for users to easily translate and mine sentences from transcripts for language learning.
@@ -31,7 +31,7 @@ Watch your favorite youtube videos for language learning. The goal of this proje
 
 Pull the repo from Github and navigate to the folder.
 ```
-cd SMTK
+cd SMConstruct
 ```
 
 Run the setup.py script in the root folder. This will install further dependencies.
@@ -51,7 +51,7 @@ This will generate a `start.bat` and a `stop.bat` in the root folder. Now you ca
 ### Installing with Docker
 After Docker is installed navigate to the SMTK folder.
 ```
-cd SMTK
+cd SMConstruct
 ```
 
 Build and run the container
